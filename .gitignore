@@ -1,5 +1,6 @@
 target/
 !.mvn/wrapper/maven-wrapper.jar
+!/api-gateway/.mvn/wrapper/maven-wrapper.properties
 !**/src/main/**/target/
 !**/src/test/**/target/
 .kotlin
@@ -38,3 +39,38 @@ build/
 
 ### Mac OS ###
 .DS_Store
+
+###api-gateway
+/api-gateway/HELP.md
+/api-gateway/target/
+/api-gateway/.mvn/wrapper/maven-wrapper.jar
+/api-gateway/!**/src/main/**/target/
+/api-gateway/!**/src/test/**/target/
+
+### STS ###
+/api-gateway/.apt_generated
+/api-gateway/.classpath
+/api-gateway/.factorypath
+/api-gateway/.project
+/api-gateway/.settings
+/api-gateway/.springBeans
+/api-gateway/.sts4-cache
+
+### IntelliJ IDEA ###
+/api-gateway/.idea
+/api-gateway/*.iws
+/api-gateway/*.iml
+/api-gateway/*.ipr
+
+### NetBeans ###
+/api-gateway/nbproject/private/
+/api-gateway/nbbuild/
+/api-gateway/dist/
+/api-gateway/nbdist/
+/api-gateway/.nb-gradle/
+/api-gateway/build/
+/api-gateway/!**/src/main/**/build/
+/api-gateway/!**/src/test/**/build/
+
+### VS Code ###
+/api-gateway/.vscode/
