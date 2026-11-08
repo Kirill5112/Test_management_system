@@ -1,12 +1,13 @@
-package org.learn.testRepositoryService.project;
+package org.learn.testRepositoryService.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.learn.dto.PageResponse;
 import org.learn.enums.ProjectStatus;
-import org.learn.testRepositoryService.project.dto.ProjectCreateRequest;
-import org.learn.testRepositoryService.project.dto.ProjectResponse;
-import org.learn.testRepositoryService.project.dto.ProjectUpdateRequest;
+import org.learn.testRepositoryService.service.ProjectService;
+import org.learn.testRepositoryService.dto.project.ProjectCreateRequest;
+import org.learn.testRepositoryService.dto.project.ProjectResponse;
+import org.learn.testRepositoryService.dto.project.ProjectUpdateRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;

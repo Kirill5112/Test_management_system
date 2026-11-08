@@ -1,4 +1,4 @@
-package org.learn.testRepositoryService.project;
+package org.learn.testRepositoryService.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;

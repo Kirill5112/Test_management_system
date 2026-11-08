@@ -1,8 +1,9 @@
-package org.learn.testRepositoryService.project;
+package org.learn.testRepositoryService.mapper;
 
-import org.learn.testRepositoryService.project.dto.ProjectCreateRequest;
-import org.learn.testRepositoryService.project.dto.ProjectResponse;
-import org.learn.testRepositoryService.project.dto.ProjectUpdateRequest;
+import org.learn.testRepositoryService.entity.Project;
+import org.learn.testRepositoryService.dto.project.ProjectCreateRequest;
+import org.learn.testRepositoryService.dto.project.ProjectResponse;
+import org.learn.testRepositoryService.dto.project.ProjectUpdateRequest;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

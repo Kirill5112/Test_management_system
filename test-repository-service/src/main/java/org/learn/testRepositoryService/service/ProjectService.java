@@ -1,13 +1,16 @@
-package org.learn.testRepositoryService.project;
+package org.learn.testRepositoryService.service;
 
 import lombok.RequiredArgsConstructor;
 import org.learn.dto.PageResponse;
 import org.learn.enums.ProjectStatus;
 import org.learn.exception.ConflictException;
 import org.learn.exception.ResourceNotFoundException;
-import org.learn.testRepositoryService.project.dto.ProjectCreateRequest;
-import org.learn.testRepositoryService.project.dto.ProjectResponse;
-import org.learn.testRepositoryService.project.dto.ProjectUpdateRequest;
+import org.learn.testRepositoryService.entity.Project;
+import org.learn.testRepositoryService.mapper.ProjectMapper;
+import org.learn.testRepositoryService.dto.project.ProjectCreateRequest;
+import org.learn.testRepositoryService.dto.project.ProjectResponse;
+import org.learn.testRepositoryService.dto.project.ProjectUpdateRequest;
+import org.learn.testRepositoryService.repository.ProjectRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;

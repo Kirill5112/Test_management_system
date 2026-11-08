@@ -1,4 +1,4 @@
-package org.learn.testRepositoryService.project.dto;
+package org.learn.testRepositoryService.dto.project;
 
 import org.learn.enums.ProjectStatus;
 

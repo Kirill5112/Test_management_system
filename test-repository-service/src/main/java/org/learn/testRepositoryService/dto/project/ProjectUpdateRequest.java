@@ -1,4 +1,4 @@
-package org.learn.testRepositoryService.project.dto;
+package org.learn.testRepositoryService.dto.project;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
