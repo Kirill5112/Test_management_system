@@ -4,6 +4,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.learn.consts.KafkaTopics;
+import org.learn.enums.TestResultStatus;
 import org.learn.enums.TestRunStatus;
 import org.learn.event.TestRunFinishedEvent;
 import org.learn.exception.ConflictException;
@@ -17,6 +18,7 @@ import org.learn.testExecutionService.dto.testrun.TestRunResponse;
 import org.learn.testExecutionService.dto.testrun.TestRunUpdateRequest;
 import org.learn.testExecutionService.entity.TestRun;
 import org.learn.testExecutionService.mapper.TestRunMapper;
+import org.learn.testExecutionService.repository.TestResultRepository;
 import org.learn.testExecutionService.repository.TestRunRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -43,6 +45,7 @@ public class TestRunService {
     private final ProjectClient projectClient;
     private final UserClient userClient;
     private final KafkaTemplate<Object, Object> kafkaTemplate;
+    private final TestResultRepository testResultRepository;
 
     // ---------- CRUD ----------
 
@@ -108,32 +111,38 @@ public class TestRunService {
         run.setFinishedAt(OffsetDateTime.now());
         TestRun saved = testRunRepository.save(run);
 
-        // TODO (roadmap §8): after TestResult slice — build summary from test_results
         publishTestRunFinished(saved);
 
         return testRunMapper.toResponse(saved);
     }
 
     private void publishTestRunFinished(TestRun run) {
+        long total   = testResultRepository.countByTestRunId(run.getId());
+        long passed  = testResultRepository.countByTestRunIdAndStatus(run.getId(), TestResultStatus.PASSED);
+        long failed  = testResultRepository.countByTestRunIdAndStatus(run.getId(), TestResultStatus.FAILED);
+        long blocked = testResultRepository.countByTestRunIdAndStatus(run.getId(), TestResultStatus.BLOCKED);
+
+        // total включает SKIPPED — ср. Конспект 1 §5 (пример без skipped: 7+2+1=10)
         TestRunFinishedEvent event = new TestRunFinishedEvent(
                 "TestRunFinished",
                 run.getId(),
                 run.getProjectId(),
                 run.getStatus().name(),
                 run.getFinishedAt(),
-                new TestRunFinishedEvent.Summary(0, 0, 0, 0),   // TODO: real counts after TestResult
-                run.getCreatedById()                           // TODO: replace with real triggeredBy after security
+                new TestRunFinishedEvent.Summary(
+                        (int) total, (int) passed, (int) failed, (int) blocked),
+                run.getCreatedById()   // TODO (roadmap): real triggeredBy после Security
         );
 
-        String key = run.getId().toString();
-        kafkaTemplate.send(KafkaTopics.TEST_RUN_EVENTS, key, event)
+        kafkaTemplate.send(KafkaTopics.TEST_RUN_EVENTS, run.getId().toString(), event)
                 .whenComplete((result, ex) -> {
                     if (ex != null) {
                         log.error("Failed to publish TestRunFinished: testRunId={}", run.getId(), ex);
                     } else {
                         var meta = result.getRecordMetadata();
-                        log.info("Published TestRunFinished: testRunId={}, topic={}, partition={}, offset={}",
-                                run.getId(), meta.topic(), meta.partition(), meta.offset());
+                        log.info("Published TestRunFinished: testRunId={}, topic={}, partition={}, offset={}, summary={}/{}/{}/{}",
+                                run.getId(), meta.topic(), meta.partition(), meta.offset(),
+                                total, passed, failed, blocked);
                     }
                 });
     }
