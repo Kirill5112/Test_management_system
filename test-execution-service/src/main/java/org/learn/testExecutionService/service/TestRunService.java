@@ -4,6 +4,7 @@ import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.learn.consts.KafkaTopics;
+import org.learn.enums.ErrorCode;
 import org.learn.enums.TestResultStatus;
 import org.learn.enums.TestRunStatus;
 import org.learn.event.TestRunFinishedEvent;
@@ -35,11 +36,6 @@ import java.util.UUID;
 @Slf4j
 public class TestRunService {
 
-    public static final String TEST_RUN_NOT_FOUND = "TEST_RUN_NOT_FOUND";
-    public static final String TEST_RUN_INVALID_STATE = "TEST_RUN_INVALID_STATE";
-    public static final String REPOSITORY_UNAVAILABLE = "REPOSITORY_UNAVAILABLE";
-    public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
-    public static final String PROJECT_NOT_FOUND = "PROJECT_NOT_FOUND";
     private final TestRunRepository testRunRepository;
     private final TestRunMapper testRunMapper;
     private final ProjectClient projectClient;
@@ -151,7 +147,7 @@ public class TestRunService {
         TestRun entity = findOrThrow(id);
         if (entity.getStatus() != TestRunStatus.CREATED
                 && entity.getStatus() != TestRunStatus.IN_PROGRESS) {
-            throw new ConflictException(TEST_RUN_INVALID_STATE,
+            throw new ConflictException(ErrorCode.TEST_RUN_INVALID_STATE.getCode(),
                     "Only CREATED or IN_PROGRESS test runs can be aborted");
         }
         entity.setStatus(TestRunStatus.ABORTED);
@@ -164,13 +160,13 @@ public class TestRunService {
     private TestRun findOrThrow(UUID id) {
         return testRunRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        TEST_RUN_NOT_FOUND,
+                        ErrorCode.TEST_RUN_NOT_FOUND.getCode(),
                         "Test run with id " + id + " not found"));
     }
 
     private void requireStatus(TestRun entity, TestRunStatus expected, String message) {
         if (entity.getStatus() != expected) {
-            throw new ConflictException(TEST_RUN_INVALID_STATE, message);
+            throw new ConflictException(ErrorCode.TEST_RUN_INVALID_STATE.getCode(), message);
         }
     }
 
@@ -179,11 +175,11 @@ public class TestRunService {
             projectClient.checkExists(projectId);
         } catch (FeignException.NotFound e) {
             throw new ResourceNotFoundException(
-                    PROJECT_NOT_FOUND,
+                    ErrorCode.PROJECT_NOT_FOUND.getCode(),
                     "Project with id " + projectId + " not found");
         } catch (FeignException e) {
             throw new ServiceUnavailableException(
-                    REPOSITORY_UNAVAILABLE,
+                    ErrorCode.REPOSITORY_UNAVAILABLE.getCode(),
                     "Unable to validate projectId: " + e.getMessage());
         }
     }
@@ -193,11 +189,11 @@ public class TestRunService {
             userClient.checkExists(userId);
         } catch (FeignException.NotFound e) {
             throw new ResourceNotFoundException(
-                    USER_NOT_FOUND,
+                    ErrorCode.USER_NOT_FOUND.getCode(),
                     "User with id " + userId + " not found");
         } catch (FeignException e) {
             throw new ServiceUnavailableException(
-                    REPOSITORY_UNAVAILABLE,
+                    ErrorCode.REPOSITORY_UNAVAILABLE.getCode(),
                     "Unable to validate createdById: " + e.getMessage());
         }
     }

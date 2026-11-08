@@ -1,6 +1,7 @@
 package org.learn.testRepositoryService.service;
 
 import lombok.RequiredArgsConstructor;
+import org.learn.enums.ErrorCode;
 import org.learn.exception.ConflictException;
 import org.learn.exception.ResourceNotFoundException;
 import org.learn.testRepositoryService.dto.user.ChangePasswordRequest;
@@ -23,9 +24,6 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class UserService {
 
-    public static final String USERNAME_ALREADY_EXISTS = "USERNAME_ALREADY_EXISTS";
-    public static final String EMAIL_ALREADY_EXISTS = "EMAIL_ALREADY_EXISTS";
-    public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
     private final UserRepository userRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
@@ -34,12 +32,12 @@ public class UserService {
     public UserResponse create(UserCreateRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new ConflictException(
-                    USERNAME_ALREADY_EXISTS,
+                    ErrorCode.USERNAME_ALREADY_EXISTS.getCode(),
                     "User with username '" + request.getUsername() + "' already exists");
         }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ConflictException(
-                    EMAIL_ALREADY_EXISTS,
+                    ErrorCode.EMAIL_ALREADY_EXISTS.getCode(),
                     "User with email '" + request.getEmail() + "' already exists");
         }
         User user = userMapper.toEntity(request);
@@ -57,7 +55,7 @@ public class UserService {
     public UserResponse getByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        USER_NOT_FOUND,
+                        ErrorCode.USER_NOT_FOUND.getCode(),
                         "User not found with username '" + username + "'"));
         return userMapper.toResponse(user);
     }
@@ -71,12 +69,12 @@ public class UserService {
         User user = findOrThrow(id);
         if (userRepository.existsByUsernameAndIdNot(request.getUsername(), id)) {
             throw new ConflictException(
-                    USERNAME_ALREADY_EXISTS,
+                    ErrorCode.USERNAME_ALREADY_EXISTS.getCode(),
                     "User with username '" + request.getUsername() + "' already exists");
         }
         if (userRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
             throw new ConflictException(
-                    EMAIL_ALREADY_EXISTS,
+                    ErrorCode.EMAIL_ALREADY_EXISTS.getCode(),
                     "User with email '" + request.getEmail() + "' already exists");
         }
         userMapper.updateEntity(request, user);
@@ -101,7 +99,7 @@ public class UserService {
     private User findOrThrow(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        USER_NOT_FOUND,
+                        ErrorCode.USER_NOT_FOUND.getCode(),
                         "User not found with id '" + id + "'"));
     }
 }

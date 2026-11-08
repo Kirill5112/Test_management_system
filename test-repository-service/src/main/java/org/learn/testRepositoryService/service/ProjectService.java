@@ -2,6 +2,7 @@ package org.learn.testRepositoryService.service;
 
 import lombok.RequiredArgsConstructor;
 import org.learn.dto.PageResponse;
+import org.learn.enums.ErrorCode;
 import org.learn.enums.ProjectStatus;
 import org.learn.exception.ConflictException;
 import org.learn.exception.ResourceNotFoundException;
@@ -23,9 +24,6 @@ import java.util.UUID;
 @Transactional
 public class ProjectService {
 
-    private static final String CODE_NOT_FOUND = "PROJECT_NOT_FOUND";
-    private static final String CODE_KEY_EXISTS = "PROJECT_KEY_EXISTS";
-
     private final ProjectRepository projectRepository;
     private final ProjectMapper projectMapper;
 
@@ -41,19 +39,19 @@ public class ProjectService {
     public ProjectResponse findById(UUID id) {
         return projectRepository.findById(id)
                 .map(projectMapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException(CODE_NOT_FOUND, "Project not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PROJECT_NOT_FOUND.getCode(), "Project not found: " + id));
     }
 
     @Transactional(readOnly = true)
     public ProjectResponse findByKey(String key) {
         return projectRepository.findByKey(key)
                 .map(projectMapper::toResponse)
-                .orElseThrow(() -> new ResourceNotFoundException(CODE_NOT_FOUND, "Project not found: " + key));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PROJECT_NOT_FOUND.getCode(), "Project not found: " + key));
     }
 
     public ProjectResponse create(ProjectCreateRequest request) {
         if (projectRepository.existsByKey(request.key())) {
-            throw new ConflictException(CODE_KEY_EXISTS, "Project key already exists: " + request.key());
+            throw new ConflictException(ErrorCode.PROJECT_KEY_EXISTS.getCode(), "Project key already exists: " + request.key());
         }
 
         Project project = projectMapper.toEntity(request);
@@ -64,7 +62,7 @@ public class ProjectService {
 
     public ProjectResponse update(UUID id, ProjectUpdateRequest request) {
         Project project = projectRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(CODE_NOT_FOUND, "Project not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.PROJECT_NOT_FOUND.getCode(), "Project not found: " + id));
         projectMapper.updateEntity(request, project);
         // JPA flush в конце транзакции, но обновим @UpdateTimestamp вручную для читаемости ответа:
         return projectMapper.toResponse(projectRepository.save(project));
@@ -72,7 +70,7 @@ public class ProjectService {
 
     public void delete(UUID id) {
         if (!projectRepository.existsById(id)) {
-            throw new ResourceNotFoundException(CODE_NOT_FOUND, "Project not found: " + id);
+            throw new ResourceNotFoundException(ErrorCode.PROJECT_NOT_FOUND.getCode(), "Project not found: " + id);
         }
         projectRepository.deleteById(id);
     }

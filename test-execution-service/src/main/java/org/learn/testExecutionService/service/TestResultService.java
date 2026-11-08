@@ -2,6 +2,7 @@ package org.learn.testExecutionService.service;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import org.learn.enums.ErrorCode;
 import org.learn.enums.TestResultStatus;
 import org.learn.enums.TestRunStatus;
 import org.learn.exception.*;
@@ -37,7 +38,7 @@ public class TestResultService {
 
         if (testResultRepository.existsByTestRunIdAndTestCaseId(request.testRunId(), request.testCaseId())) {
             throw new ConflictException(
-                    "TEST_RESULT_ALREADY_EXISTS",
+                    ErrorCode.TEST_RESULT_ALREADY_EXISTS.getCode(),
                     "Result for testCase " + request.testCaseId()
                             + " already exists in run " + request.testRunId());
         }
@@ -96,13 +97,13 @@ public class TestResultService {
     private TestResult findOrThrow(UUID id) {
         return testResultRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "TEST_RESULT_NOT_FOUND", "TestResult not found: " + id));
+                        ErrorCode.TEST_RESULT_NOT_FOUND.getCode(), "TestResult not found: " + id));
     }
 
     private TestRun requireRunInProgress(UUID testRunId) {
         TestRun run = testRunRepository.findById(testRunId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "TEST_RUN_NOT_FOUND", "TestRun not found: " + testRunId));
+                        ErrorCode.TEST_RUN_NOT_FOUND.getCode(), "TestRun not found: " + testRunId));
         if (run.getStatus() != TestRunStatus.IN_PROGRESS) {
             throw new ConflictException(
                     "TEST_RUN_INVALID_STATE",
@@ -118,7 +119,7 @@ public class TestResultService {
             throw new ResourceNotFoundException("USER_NOT_FOUND", "User not found: " + userId);
         } catch (FeignException e) {                 // родитель — после NotFound (правило §8.4)
             throw new ServiceUnavailableException(
-                    "REPOSITORY_UNAVAILABLE", "Repository service unavailable: " + e.getMessage());
+                    ErrorCode.REPOSITORY_UNAVAILABLE.getCode(), "Repository service unavailable: " + e.getMessage());
         }
     }
 }
