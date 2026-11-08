@@ -1,10 +1,14 @@
 package org.learn.testExecutionService.service;
 
+import feign.FeignException;
 import lombok.RequiredArgsConstructor;
 import org.learn.enums.TestRunStatus;
 import org.learn.exception.ConflictException;
 import org.learn.exception.ResourceNotFoundException;
 import org.learn.dto.PageResponse;
+import org.learn.exception.ServiceUnavailableException;
+import org.learn.testExecutionService.client.ProjectClient;
+import org.learn.testExecutionService.client.UserClient;
 import org.learn.testExecutionService.dto.testrun.TestRunCreateRequest;
 import org.learn.testExecutionService.dto.testrun.TestRunResponse;
 import org.learn.testExecutionService.dto.testrun.TestRunUpdateRequest;
@@ -26,16 +30,24 @@ public class TestRunService {
 
     public static final String TEST_RUN_NOT_FOUND = "TEST_RUN_NOT_FOUND";
     public static final String TEST_RUN_INVALID_STATE = "TEST_RUN_INVALID_STATE";
+    public static final String REPOSITORY_UNAVAILABLE = "REPOSITORY_UNAVAILABLE";
+    public static final String USER_NOT_FOUND = "USER_NOT_FOUND";
+    public static final String PROJECT_NOT_FOUND = "PROJECT_NOT_FOUND";
     private final TestRunRepository testRunRepository;
     private final TestRunMapper testRunMapper;
+    private final ProjectClient projectClient;
+    private final UserClient userClient;
 
     // ---------- CRUD ----------
 
     public TestRunResponse create(TestRunCreateRequest request) {
+        validateProjectExists(request.projectId());
+        validateUserExists(request.createdById());
+
         TestRun entity = testRunMapper.toEntity(request);
-        // страховка №3 (mapper + @PrePersist уже не спасут, если вдруг отрубят)
         if (entity.getStatus() == null) entity.setStatus(TestRunStatus.CREATED);
         entity.setStatus(TestRunStatus.CREATED);
+
         TestRun saved = testRunRepository.save(entity);
         return testRunMapper.toResponse(saved);
     }
@@ -108,6 +120,34 @@ public class TestRunService {
     private void requireStatus(TestRun entity, TestRunStatus expected, String message) {
         if (entity.getStatus() != expected) {
             throw new ConflictException(TEST_RUN_INVALID_STATE, message);
+        }
+    }
+
+    private void validateProjectExists(UUID projectId) {
+        try {
+            projectClient.checkExists(projectId);
+        } catch (FeignException.NotFound e) {
+            throw new ResourceNotFoundException(
+                    PROJECT_NOT_FOUND,
+                    "Project with id " + projectId + " not found");
+        } catch (FeignException e) {
+            throw new ServiceUnavailableException(
+                    REPOSITORY_UNAVAILABLE,
+                    "Unable to validate projectId: " + e.getMessage());
+        }
+    }
+
+    private void validateUserExists(UUID userId) {
+        try {
+            userClient.checkExists(userId);
+        } catch (FeignException.NotFound e) {
+            throw new ResourceNotFoundException(
+                    USER_NOT_FOUND,
+                    "User with id " + userId + " not found");
+        } catch (FeignException e) {
+            throw new ServiceUnavailableException(
+                    REPOSITORY_UNAVAILABLE,
+                    "Unable to validate createdById: " + e.getMessage());
         }
     }
 }
