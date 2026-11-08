@@ -2,7 +2,10 @@ package org.learn.testExecutionService.service;
 
 import feign.FeignException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.learn.consts.KafkaTopics;
 import org.learn.enums.TestRunStatus;
+import org.learn.event.TestRunFinishedEvent;
 import org.learn.exception.ConflictException;
 import org.learn.exception.ResourceNotFoundException;
 import org.learn.dto.PageResponse;
@@ -17,6 +20,7 @@ import org.learn.testExecutionService.mapper.TestRunMapper;
 import org.learn.testExecutionService.repository.TestRunRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +30,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 public class TestRunService {
 
     public static final String TEST_RUN_NOT_FOUND = "TEST_RUN_NOT_FOUND";
@@ -37,6 +42,7 @@ public class TestRunService {
     private final TestRunMapper testRunMapper;
     private final ProjectClient projectClient;
     private final UserClient userClient;
+    private final KafkaTemplate<Object, Object> kafkaTemplate;
 
     // ---------- CRUD ----------
 
@@ -86,14 +92,50 @@ public class TestRunService {
         return testRunMapper.toResponse(testRunRepository.save(entity));
     }
 
+    @Transactional
     public TestRunResponse complete(UUID id) {
-        TestRun entity = findOrThrow(id);
-        requireStatus(entity, TestRunStatus.IN_PROGRESS, "Only IN_PROGRESS test runs can be completed");
-        entity.setStatus(TestRunStatus.COMPLETED);
-        entity.setFinishedAt(OffsetDateTime.now());
-        TestRun saved = testRunRepository.save(entity);
-        // TODO (roadmap шаг 6): publish TestRunFinishedEvent in Kafka topic test-run-events
+        TestRun run = testRunRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "TEST_RUN_NOT_FOUND", "TestRun not found: " + id));
+
+        if (run.getStatus() != TestRunStatus.IN_PROGRESS) {
+            throw new ConflictException(
+                    "TEST_RUN_INVALID_STATE",
+                    "Cannot complete TestRun in status " + run.getStatus());
+        }
+
+        run.setStatus(TestRunStatus.COMPLETED);
+        run.setFinishedAt(OffsetDateTime.now());
+        TestRun saved = testRunRepository.save(run);
+
+        // TODO (roadmap §8): after TestResult slice — build summary from test_results
+        publishTestRunFinished(saved);
+
         return testRunMapper.toResponse(saved);
+    }
+
+    private void publishTestRunFinished(TestRun run) {
+        TestRunFinishedEvent event = new TestRunFinishedEvent(
+                "TestRunFinished",
+                run.getId(),
+                run.getProjectId(),
+                run.getStatus().name(),
+                run.getFinishedAt(),
+                new TestRunFinishedEvent.Summary(0, 0, 0, 0),   // TODO: real counts after TestResult
+                run.getCreatedById()                           // TODO: replace with real triggeredBy after security
+        );
+
+        String key = run.getId().toString();
+        kafkaTemplate.send(KafkaTopics.TEST_RUN_EVENTS, key, event)
+                .whenComplete((result, ex) -> {
+                    if (ex != null) {
+                        log.error("Failed to publish TestRunFinished: testRunId={}", run.getId(), ex);
+                    } else {
+                        var meta = result.getRecordMetadata();
+                        log.info("Published TestRunFinished: testRunId={}, topic={}, partition={}, offset={}",
+                                run.getId(), meta.topic(), meta.partition(), meta.offset());
+                    }
+                });
     }
 
     public TestRunResponse abort(UUID id) {
