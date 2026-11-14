@@ -1,0 +1,21 @@
+$kind: http-request
+url: '{{gateway}}/api/execution/bug-reports'
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "projectId":"{{projectId}}",
+        "title":"Login button does not work",
+        "description":"On Safari 18",
+        "severity":"MAJOR",
+        "priority":"HIGH",
+        "reporterId":"{{userId}}"
+      }
+scripts:
+  - type: afterResponse
+    code: pm.collectionVariables.set("bugId", pm.response.json().id);
+    language: text/javascript
+order: 1000

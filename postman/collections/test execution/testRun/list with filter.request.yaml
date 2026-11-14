@@ -1,0 +1,10 @@
+$kind: http-request
+url: '{{gateway}}/api/execution/test-runs?projectId={{projectId}}&status=CREATED&page=0&size=10&sort=createdAt,desc'
+method: GET
+queryParams:
+  projectId: "{{projectId}}"
+  status: CREATED
+  page: "0"
+  size: "10"
+  sort: createdAt,desc
+order: 2000

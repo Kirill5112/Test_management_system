@@ -1,8 +1,16 @@
 package org.learn.enums;
 
+import lombok.Getter;
+
+@Getter
 public enum ErrorCode {
 
     PROJECT_NOT_FOUND("PROJECT_NOT_FOUND"),
+    PROJECT_MEMBER_NOT_FOUND("PROJECT_MEMBER_NOT_FOUND"),
+    PROJECT_MEMBER_ALREADY_EXISTS("PROJECT_MEMBER_ALREADY_EXISTS"),
+    TEST_SUITE_NOT_FOUND("TEST_SUITE_NOT_FOUND"),
+    TEST_SUITE_INVALID_PARENT("TEST_SUITE_INVALID_PARENT"),
+    TEST_CASE_NOT_FOUND("TEST_CASE_NOT_FOUND"),
     PROJECT_KEY_EXISTS("PROJECT_KEY_EXISTS"),
     BUG_REPORT_NOT_FOUND("BUG_REPORT_NOT_FOUND"),
     REPOSITORY_UNAVAILABLE("REPOSITORY_UNAVAILABLE"),
@@ -16,9 +24,5 @@ public enum ErrorCode {
     private final String code;
     ErrorCode(String code) {
         this.code = code;
-    }
-
-    public String getCode() {
-        return code;
     }
 }

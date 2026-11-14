@@ -1,0 +1,4 @@
+$kind: http-request
+url: '{{gateway}}/api/execution/bug-reports/{{bugId}}'
+method: DELETE
+order: 4000

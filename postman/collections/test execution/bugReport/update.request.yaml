@@ -1,0 +1,16 @@
+$kind: http-request
+url: '{{gateway}}/api/execution/bug-reports/{{bugId}}'
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "title": "Login button does not work",
+        "description": "Fixed",
+        "status": "RESOLVED",
+        "severity": "MAJOR",
+        "priority": "HIGH"
+    }
+order: 3000

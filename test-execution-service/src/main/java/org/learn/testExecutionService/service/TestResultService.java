@@ -6,6 +6,7 @@ import org.learn.enums.ErrorCode;
 import org.learn.enums.TestResultStatus;
 import org.learn.enums.TestRunStatus;
 import org.learn.exception.*;
+import org.learn.testExecutionService.client.TestCaseClient;
 import org.learn.testExecutionService.client.UserClient;
 import org.learn.testExecutionService.dto.testresult.TestResultCreateRequest;
 import org.learn.testExecutionService.dto.testresult.TestResultResponse;
@@ -32,13 +33,14 @@ public class TestResultService {
     private final TestRunRepository testRunRepository;
     private final TestResultMapper testResultMapper;
     private final UserClient userClient;
+    private final TestCaseClient testCaseClient;
 
     public TestResultResponse create(TestResultCreateRequest request) {
         TestRun run = requireRunInProgress(request.testRunId());
 
         if (testResultRepository.existsByTestRunIdAndTestCaseId(request.testRunId(), request.testCaseId())) {
             throw new ConflictException(
-                    ErrorCode.TEST_RESULT_ALREADY_EXISTS.getCode(),
+                    ErrorCode.TEST_RESULT_ALREADY_EXISTS,
                     "Result for testCase " + request.testCaseId()
                             + " already exists in run " + request.testRunId());
         }
@@ -47,7 +49,7 @@ public class TestResultService {
             validateUserExists(request.executedById());
         }
 
-        // TODO (roadmap): validate testCaseId via Feign once TestCase slice is done in Repository
+        validateTestCaseExists(request.testCaseId());
 
         TestResult entity = testResultMapper.toEntity(request);
         entity.setExecutedAt(OffsetDateTime.now());
@@ -59,7 +61,7 @@ public class TestResultService {
     @Transactional(readOnly = true)
     public Page<TestResultResponse> list(UUID testRunId, TestResultStatus status, Pageable pageable) {
         if (!testRunRepository.existsById(testRunId)) {
-            throw new ResourceNotFoundException("TEST_RUN_NOT_FOUND", "TestRun not found: " + testRunId);
+            throw new ResourceNotFoundException(ErrorCode.TEST_RUN_NOT_FOUND, "TestRun not found: " + testRunId);
         }
         Page<TestResult> page = (status == null)
                 ? testResultRepository.findByTestRunId(testRunId, pageable)
@@ -97,16 +99,16 @@ public class TestResultService {
     private TestResult findOrThrow(UUID id) {
         return testResultRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        ErrorCode.TEST_RESULT_NOT_FOUND.getCode(), "TestResult not found: " + id));
+                        ErrorCode.TEST_RESULT_NOT_FOUND, "TestResult not found: " + id));
     }
 
     private TestRun requireRunInProgress(UUID testRunId) {
         TestRun run = testRunRepository.findById(testRunId)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        ErrorCode.TEST_RUN_NOT_FOUND.getCode(), "TestRun not found: " + testRunId));
+                        ErrorCode.TEST_RUN_NOT_FOUND, "TestRun not found: " + testRunId));
         if (run.getStatus() != TestRunStatus.IN_PROGRESS) {
             throw new ConflictException(
-                    "TEST_RUN_INVALID_STATE",
+                    ErrorCode.TEST_RUN_INVALID_STATE,
                     "TestRun " + testRunId + " is " + run.getStatus() + "; results allowed only in IN_PROGRESS");
         }
         return run;
@@ -116,10 +118,24 @@ public class TestResultService {
         try {
             userClient.checkExists(userId);
         } catch (FeignException.NotFound e) {
-            throw new ResourceNotFoundException("USER_NOT_FOUND", "User not found: " + userId);
+            throw new ResourceNotFoundException(ErrorCode.USER_NOT_FOUND, "User not found: " + userId);
         } catch (FeignException e) {                 // родитель — после NotFound (правило §8.4)
             throw new ServiceUnavailableException(
-                    ErrorCode.REPOSITORY_UNAVAILABLE.getCode(), "Repository service unavailable: " + e.getMessage());
+                    ErrorCode.REPOSITORY_UNAVAILABLE, "Repository service unavailable: " + e.getMessage());
+        }
+    }
+
+    private void validateTestCaseExists(UUID testCaseId) {
+        try {
+            testCaseClient.checkExists(testCaseId);
+        } catch (FeignException.NotFound e) {
+            throw new ResourceNotFoundException(
+                    ErrorCode.TEST_CASE_NOT_FOUND,
+                    "Test case not found: " + testCaseId);
+        } catch (FeignException e) {
+            throw new ServiceUnavailableException(
+                    ErrorCode.REPOSITORY_UNAVAILABLE,
+                    "Repository service unavailable");
         }
     }
 }

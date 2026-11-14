@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{gateway}}/api/repository/test-suites"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"projectId\": \"{{projectId}}\",\r
+
+    \    \"name\": \"Smoke Suite\"\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: pm.collectionVariables.set("suiteId", pm.response.json().id);
+    language: text/javascript
+order: 2000

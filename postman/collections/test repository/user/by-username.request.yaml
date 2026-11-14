@@ -1,0 +1,19 @@
+$kind: http-request
+url: "{{gateway}}/api/repository/users/by-username/{{userName}}"
+method: GET
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "key": "DEMO",
+        "name": "Demo Project",
+        "description": "First slice",
+        "ownerId": "11111111-1111-1111-1111-111111111111"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.collectionVariables.set("userId", pm.response.json().id);
+    language: text/javascript
+order: 4000

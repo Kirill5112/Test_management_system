@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{gateway}}/api/repository/test-suites/{{parentSuiteId}}"
+method: DELETE
+headers:
+  Content-Type: application/json
+scripts:
+  - type: afterResponse
+    code: pm.collectionVariables.set("suiteId", pm.response.json().id);
+    language: text/javascript
+order: 4000

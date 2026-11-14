@@ -1,0 +1,8 @@
+$kind: http-request
+url: '{{gateway}}/api/execution/bug-reports?projectId={{projectId}}&page=0&size=20'
+method: GET
+queryParams:
+  projectId: "{{projectId}}"
+  page: "0"
+  size: "20"
+order: 2000

@@ -1,0 +1,23 @@
+$kind: http-request
+url: "{{gateway}}/api/repository/test-suites"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"projectId\": \"{{projectId}}\",\r
+
+    \    \"parentSuiteId\": \"{{suiteId}}\",\r
+
+    \    \"name\": \"Nested\"\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: "pm.collectionVariables.set(\"childSuiteId\", pm.response.json().id);\r
+
+      pm.collectionVariables.set(\"parentSuiteId\", pm.response.json().parentSuiteId);"
+    language: text/javascript
+order: 3000

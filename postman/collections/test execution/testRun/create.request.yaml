@@ -1,0 +1,25 @@
+$kind: http-request
+url: '{{gateway}}/api/execution/test-runs'
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"projectId\": \"{{projectId}}\",\r
+
+    \    \"name\": \"Smoke Run\",\r
+
+    \    \"environment\": \"local\",\r
+
+    \    \"buildVersion\": \"1.0.0\",\r
+
+    \    \"createdById\": \"{{userId}}\"\r
+
+    }"
+scripts:
+  - type: afterResponse
+    code: pm.collectionVariables.set("testRunId", pm.response.json().id);
+    language: text/javascript
+order: 1000

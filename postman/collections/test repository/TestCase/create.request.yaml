@@ -1,0 +1,27 @@
+$kind: http-request
+url: "{{gateway}}/api/repository/test-cases"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "suiteId": "{{suiteId}}",
+        "title": "Login works",
+        "steps": [
+            {
+                "order": 1,
+                "action": "Open /login",
+                "expected": "Page loaded"
+            }
+        ],
+        "priority": "HIGH",
+        "type": "MANUAL",
+        "createdById": "{{userId}}"
+    }
+scripts:
+  - type: afterResponse
+    code: pm.collectionVariables.set("testCaseId", pm.response.json().id);
+    language: text/javascript
+order: 2000

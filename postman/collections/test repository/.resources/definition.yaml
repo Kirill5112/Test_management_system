@@ -1,0 +1,10 @@
+$kind: collection
+variables:
+  projectKey: ""
+  userId: ""
+  userName: ""
+  projectId: ""
+  suiteId: ""
+  parentSuiteId: ""
+  childSuiteId: ""
+  testCaseId: ""

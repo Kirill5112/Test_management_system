@@ -1,0 +1,15 @@
+$kind: http-request
+url: '{{gateway}}/api/repository/projects'
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+        "key": "DEMO",
+        "name": "Demo Project",
+        "description": "First slice",
+        "ownerId": "11111111-1111-1111-1111-111111111111"
+    }
+order: 1000

@@ -95,11 +95,11 @@ public class TestRunService {
     public TestRunResponse complete(UUID id) {
         TestRun run = testRunRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        "TEST_RUN_NOT_FOUND", "TestRun not found: " + id));
+                        ErrorCode.TEST_RUN_NOT_FOUND, "TestRun not found: " + id));
 
         if (run.getStatus() != TestRunStatus.IN_PROGRESS) {
             throw new ConflictException(
-                    "TEST_RUN_INVALID_STATE",
+                    ErrorCode.TEST_RUN_INVALID_STATE,
                     "Cannot complete TestRun in status " + run.getStatus());
         }
 
@@ -147,7 +147,7 @@ public class TestRunService {
         TestRun entity = findOrThrow(id);
         if (entity.getStatus() != TestRunStatus.CREATED
                 && entity.getStatus() != TestRunStatus.IN_PROGRESS) {
-            throw new ConflictException(ErrorCode.TEST_RUN_INVALID_STATE.getCode(),
+            throw new ConflictException(ErrorCode.TEST_RUN_INVALID_STATE,
                     "Only CREATED or IN_PROGRESS test runs can be aborted");
         }
         entity.setStatus(TestRunStatus.ABORTED);
@@ -160,13 +160,13 @@ public class TestRunService {
     private TestRun findOrThrow(UUID id) {
         return testRunRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        ErrorCode.TEST_RUN_NOT_FOUND.getCode(),
+                        ErrorCode.TEST_RUN_NOT_FOUND,
                         "Test run with id " + id + " not found"));
     }
 
     private void requireStatus(TestRun entity, TestRunStatus expected, String message) {
         if (entity.getStatus() != expected) {
-            throw new ConflictException(ErrorCode.TEST_RUN_INVALID_STATE.getCode(), message);
+            throw new ConflictException(ErrorCode.TEST_RUN_INVALID_STATE, message);
         }
     }
 
@@ -175,11 +175,11 @@ public class TestRunService {
             projectClient.checkExists(projectId);
         } catch (FeignException.NotFound e) {
             throw new ResourceNotFoundException(
-                    ErrorCode.PROJECT_NOT_FOUND.getCode(),
+                    ErrorCode.PROJECT_NOT_FOUND,
                     "Project with id " + projectId + " not found");
         } catch (FeignException e) {
             throw new ServiceUnavailableException(
-                    ErrorCode.REPOSITORY_UNAVAILABLE.getCode(),
+                    ErrorCode.REPOSITORY_UNAVAILABLE,
                     "Unable to validate projectId: " + e.getMessage());
         }
     }
@@ -189,11 +189,11 @@ public class TestRunService {
             userClient.checkExists(userId);
         } catch (FeignException.NotFound e) {
             throw new ResourceNotFoundException(
-                    ErrorCode.USER_NOT_FOUND.getCode(),
+                    ErrorCode.USER_NOT_FOUND,
                     "User with id " + userId + " not found");
         } catch (FeignException e) {
             throw new ServiceUnavailableException(
-                    ErrorCode.REPOSITORY_UNAVAILABLE.getCode(),
+                    ErrorCode.REPOSITORY_UNAVAILABLE,
                     "Unable to validate createdById: " + e.getMessage());
         }
     }

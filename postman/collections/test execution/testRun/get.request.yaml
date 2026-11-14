@@ -1,0 +1,4 @@
+$kind: http-request
+url: '{{gateway}}/api/execution/test-runs/{{testRunId}}'
+method: GET
+order: 6000

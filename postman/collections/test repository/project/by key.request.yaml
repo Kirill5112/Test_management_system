@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{gateway}}/api/repository/projects/by-key/{{projectKey}}"
+method: GET
+scripts:
+  - type: afterResponse
+    code: pm.collectionVariables.set("projectId", pm.response.json().id);
+    language: text/javascript
+order: 3000

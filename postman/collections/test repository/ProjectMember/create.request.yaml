@@ -1,0 +1,17 @@
+$kind: http-request
+url: "{{gateway}}/api/repository/project-members"
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"projectId\": \"{{projectId}}\",\r
+
+    \    \"userId\": \"{{userId}}\",\r
+
+    \    \"roleInProject\": \"TESTER\"\r
+
+    }"
+order: 1000

@@ -32,12 +32,12 @@ public class UserService {
     public UserResponse create(UserCreateRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new ConflictException(
-                    ErrorCode.USERNAME_ALREADY_EXISTS.getCode(),
+                    ErrorCode.USERNAME_ALREADY_EXISTS,
                     "User with username '" + request.getUsername() + "' already exists");
         }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new ConflictException(
-                    ErrorCode.EMAIL_ALREADY_EXISTS.getCode(),
+                    ErrorCode.EMAIL_ALREADY_EXISTS,
                     "User with email '" + request.getEmail() + "' already exists");
         }
         User user = userMapper.toEntity(request);
@@ -55,7 +55,7 @@ public class UserService {
     public UserResponse getByUsername(String username) {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        ErrorCode.USER_NOT_FOUND.getCode(),
+                        ErrorCode.USER_NOT_FOUND,
                         "User not found with username '" + username + "'"));
         return userMapper.toResponse(user);
     }
@@ -69,12 +69,12 @@ public class UserService {
         User user = findOrThrow(id);
         if (userRepository.existsByUsernameAndIdNot(request.getUsername(), id)) {
             throw new ConflictException(
-                    ErrorCode.USERNAME_ALREADY_EXISTS.getCode(),
+                    ErrorCode.USERNAME_ALREADY_EXISTS,
                     "User with username '" + request.getUsername() + "' already exists");
         }
         if (userRepository.existsByEmailAndIdNot(request.getEmail(), id)) {
             throw new ConflictException(
-                    ErrorCode.EMAIL_ALREADY_EXISTS.getCode(),
+                    ErrorCode.EMAIL_ALREADY_EXISTS,
                     "User with email '" + request.getEmail() + "' already exists");
         }
         userMapper.updateEntity(request, user);
@@ -99,7 +99,7 @@ public class UserService {
     private User findOrThrow(UUID id) {
         return userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        ErrorCode.USER_NOT_FOUND.getCode(),
+                        ErrorCode.USER_NOT_FOUND,
                         "User not found with id '" + id + "'"));
     }
 }

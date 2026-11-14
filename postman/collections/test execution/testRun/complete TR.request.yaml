@@ -1,0 +1,4 @@
+$kind: http-request
+url: '{{gateway}}/api/execution/test-runs/{{testRunId}}/complete'
+method: PATCH
+order: 4000

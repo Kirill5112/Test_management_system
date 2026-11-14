@@ -1,0 +1,7 @@
+$kind: http-request
+url: '{{gateway}}/api/repository/projects?status=ACTIVE&size=10'
+method: GET
+queryParams:
+  status: ACTIVE
+  size: "10"
+order: 2000

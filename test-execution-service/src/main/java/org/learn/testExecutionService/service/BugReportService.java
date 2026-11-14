@@ -106,7 +106,7 @@ public class BugReportService {
     private BugReport findById(UUID id) {
         return bugReportRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(
-                        ErrorCode.BUG_REPORT_NOT_FOUND.getCode(),
+                        ErrorCode.BUG_REPORT_NOT_FOUND,
                         "Bug report not found: " + id
                 ));
     }
@@ -124,12 +124,12 @@ public class BugReportService {
             projectClient.checkExists(projectId);
         } catch (FeignException.NotFound e) {
             throw new ResourceNotFoundException(
-                    ErrorCode.PROJECT_NOT_FOUND.getCode(),
+                    ErrorCode.PROJECT_NOT_FOUND,
                     "Project not found: " + projectId
             );
         } catch (FeignException e) {
             throw new ServiceUnavailableException(
-                    ErrorCode.REPOSITORY_UNAVAILABLE.getCode(),
+                    ErrorCode.REPOSITORY_UNAVAILABLE,
                     "Repository service unavailable"
             );
         }
@@ -140,12 +140,12 @@ public class BugReportService {
             userClient.checkExists(userId);
         } catch (FeignException.NotFound e) {
             throw new ResourceNotFoundException(
-                    ErrorCode.USER_NOT_FOUND.getCode(),
+                    ErrorCode.USER_NOT_FOUND,
                     "User not found: " + userId
             );
         } catch (FeignException e) {
             throw new ServiceUnavailableException(
-                    ErrorCode.REPOSITORY_UNAVAILABLE.getCode(),
+                    ErrorCode.REPOSITORY_UNAVAILABLE,
                     "Repository service unavailable"
             );
         }
@@ -154,7 +154,7 @@ public class BugReportService {
     private void validateTestResultExists(UUID testResultId) {
         if (!testResultRepository.existsById(testResultId)) {
             throw new ResourceNotFoundException(
-                    ErrorCode.TEST_RESULT_NOT_FOUND.getCode(),
+                    ErrorCode.TEST_RESULT_NOT_FOUND,
                     "Test result not found: " + testResultId
             );
         }

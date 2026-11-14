@@ -1,0 +1,21 @@
+$kind: http-request
+url: '{{gateway}}/api/repository/users'
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"username\": \"carol\",\r
+
+    \    \"email\": \"carol@example.com\",\r
+
+    \    \"password\": \"S3cretPass!\",\r
+
+    \    \"role\": \"TESTER\",\r
+
+    \    \"active\": false\r
+
+    }"
+order: 2000

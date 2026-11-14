@@ -1,0 +1,7 @@
+$kind: collection
+variables:
+  userId: ""
+  projectId: ""
+  testRunId: ""
+  bugId: ""
+  testResId: ""

@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{gateway}}/api/repository/test-cases/{{testCaseId}}"
+method: GET
+headers:
+  Content-Type: application/json
+scripts:
+  - type: afterResponse
+    code: pm.collectionVariables.set("testCaseId", pm.response.json().id);
+    language: text/javascript
+order: 1869

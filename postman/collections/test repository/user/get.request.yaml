@@ -1,0 +1,4 @@
+$kind: http-request
+url: '{{gateway}}/api/repository/users/{{userId}}'
+method: GET
+order: 3000

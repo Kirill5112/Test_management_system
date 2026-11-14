@@ -1,0 +1,13 @@
+$kind: http-request
+url: "{{gateway}}/api/repository/project-members/{{projectId}}/{{userId}}"
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: "{\r
+
+    \    \"roleInProject\": \"MANAGER\"\r
+
+    }"
+order: 3000

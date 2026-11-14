@@ -1,0 +1,8 @@
+$kind: http-request
+url: '{{gateway}}/api/execution/test-results?testRunId={{testRunId}}&status=PASSED&size=50'
+method: GET
+queryParams:
+  testRunId: "{{testRunId}}"
+  status: PASSED
+  size: "50"
+order: 2000
