@@ -1,0 +1,39 @@
+# Профиль it — переопределения поверх application.yml (main).
+# Три места схемы (hikari / hibernate / flyway) НЕ трогаем — они уже
+# выставлены в main на test_repository. Testcontainers подменит только
+# URL/креды через @DynamicPropertySource.
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+        show_sql: false
+
+  flyway:
+    enabled: true
+    clean-disabled: true
+
+  kafka:
+    consumer:
+      group-id: test-repository-service-it
+      auto-offset-reset: earliest  # каждый новый контейнер → читаем с нуля
+      properties:
+        spring.json.trusted.packages: "org.learn.*"
+
+# Eureka не поднята в тестах — гасим клиента, иначе startup ждёт 8761.
+eureka:
+  client:
+    enabled: false
+    register-with-eureka: false
+    fetch-registry: false
+
+spring.cloud.discovery.enabled: false
+
+logging:
+  level:
+    org.springframework.kafka: WARN
+    org.apache.kafka: WARN
+    org.testcontainers: INFO
