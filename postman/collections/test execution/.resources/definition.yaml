@@ -5,3 +5,4 @@ variables:
   testRunId: ""
   bugId: ""
   testResId: ""
+  testCaseId: ""
